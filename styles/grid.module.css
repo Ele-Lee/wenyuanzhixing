@@ -1,7 +1,7 @@
 .wrap {
   width: 100vw;
   height: 100vh;
-  border: 2px solid rgb(255, 0, 200);
+  /* border: 2px solid rgb(255, 0, 200); */
 }
 
 .layout {
@@ -14,7 +14,7 @@
 }
 
 .layout span {
-  border: 1px solid #999;
+  border: 1px solid rgba(173, 173, 173, 0.6);
 
   transition: background-color 0.3s linear;
 }
