@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useLayoutEffect, useEffect, useRef } from "react";
 import { randomHexColor, workerChange } from "../utils/color";
 import { workerChangeSum } from "../utils/calc";
 import WebWorker from "../utils/worker";
@@ -78,7 +78,7 @@ export default function Grid({ query }) {
     return false;
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = document.getElementById("spanWrap");
     const fragment = document.createDocumentFragment();
 
