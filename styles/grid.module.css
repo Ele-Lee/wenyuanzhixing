@@ -1,0 +1,20 @@
+.wrap {
+  width: 100vw;
+  height: 100vh;
+  border: 2px solid rgb(255, 0, 200);
+}
+
+.layout {
+  height: 100%;
+  width: 100%;
+
+  display: grid;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.layout span {
+  border: 1px solid #999;
+
+  transition: background-color 0.3s linear;
+}

@@ -14,3 +14,33 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.toast-content {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.toast {
+  width: 26.67vw;
+  height: 26.67vw;
+  background-color: rgba(36, 36, 37, 0.81);
+  border-radius: 1.07vw;
+  box-sizing: border-box;
+  padding: 2vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.toast span {
+  text-align: center;
+  line-height: 5.33vw;
+  color: #ffffff;
+  font-size: 3.47vw;
+  white-space: pre-wrap;
+}
