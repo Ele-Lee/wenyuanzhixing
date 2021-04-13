@@ -40,48 +40,74 @@ export default function Grid({ query }) {
     }
   });
 
-  const renderCells = () => {
-    const matrixData = matrixDataRef.current;
+  const matrixData = matrixDataRef.current;
+  const _handle = (e, isLeft) => {
+    const { idxList, attrStr } = getMatrixIdxByAttr(e);
+    const setChange = () => {
+      toggleMatrixValue(matrixData, idxList);
 
-    const _handle = (e, isLeft) => {
-      const { idxList, attrStr } = getMatrixIdxByAttr(e);
-      const setChange = () => {
-        toggleMatrixValue(matrixData, idxList);
+      getSumByWorkder(matrixData, ++countRef.current);
+    };
 
-        getSumByWorkder(matrixData, ++countRef.current);
-      };
+    if (!idxList) return;
+    const isNone = getMatrixValue(matrixData, idxList);
 
-      if (!idxList) return;
-      const isNone = getMatrixValue(matrixData, idxList);
+    const targetSpan = e.target;
+    if (!isNone && isLeft) {
+      Reflect.set(recordSpanTagRef.current, attrStr, targetSpan);
+      const colorResult = randomHexColor();
+      dispatch("prechange", { [attrStr]: colorResult });
+      targetSpan.style.backgroundColor = colorResult;
+      setChange();
+    } else if (!isLeft) {
+      Reflect.deleteProperty(recordSpanTagRef.current, attrStr, targetSpan);
+      dispatch("removeKey", attrStr);
+      targetSpan.style.backgroundColor = "";
+      setChange();
+    }
+  };
 
-      const targetSpan = e.target;
-      if (!isNone && isLeft) {
-        Reflect.set(recordSpanTagRef.current, attrStr, targetSpan);
-        const colorResult = randomHexColor();
-        dispatch("prechange", { [attrStr]: colorResult });
-        targetSpan.style.backgroundColor = colorResult;
-        setChange();
-      } else if (!isLeft) {
-        Reflect.deleteProperty(recordSpanTagRef.current, attrStr, targetSpan);
-        dispatch("removeKey", attrStr);
-        targetSpan.style.backgroundColor = "";
-        setChange();
+  const leftClick = (e) => {
+    if (e.target.tagName.toLocaleLowerCase() !== "span") return;
+    _handle(e, true);
+  };
+
+  const rightClick = (e) => {
+    _handle(e, false);
+    e.preventDefault();
+    return false;
+  };
+
+  useEffect(() => {
+    const element = document.getElementById("spanWrap");
+    const fragment = document.createDocumentFragment();
+
+    const _render = (i, key) => {
+      if (matrixData.length <= i) return;
+      const list = matrixData[i];
+      list.forEach((k, j) => {
+        const span = document.createElement("span");
+        const tmp = `${i}-${j}`;
+        span.setAttribute("data-idx", tmp);
+        fragment.appendChild(span);
+      });
+      element.appendChild(fragment);
+
+      if (key % 6) {
+        _render(i + 1, key + 1);
+      } else {
+        requestAnimationFrame(() => {
+          _render(i + 1, key + 1);
+        });
       }
     };
+    _render(0, 0);
+  }, []);
 
-    const leftClick = (e) => {
-      if (e.target.tagName.toLocaleLowerCase() !== "span") return;
-      _handle(e, true);
-    };
-
-    const rightClick = (e) => {
-      _handle(e, false);
-      e.preventDefault();
-      return false;
-    };
-
-    return (
+  return (
+    <div className={styles.wrap}>
       <div
+        id="spanWrap"
         onClick={leftClick}
         onContextMenu={rightClick}
         className={styles.layout}
@@ -90,17 +116,15 @@ export default function Grid({ query }) {
           gridTemplateColumns: `repeat(${matrixData[0].length}, 1fr)`,
         }}
       >
-        {matrixData.map((item, i) =>
+        {/* {matrixData.map((item, i) =>
           Array.from(item).map((_, j) => {
             const tmp = `${i}-${j}`;
             return <span key={tmp} data-idx={tmp}></span>;
           })
-        )}
+        )} */}
       </div>
-    );
-  };
-
-  return <div className={styles.wrap}>{renderCells()}</div>;
+    </div>
+  );
 }
 
 function useCalcNum(cb) {
