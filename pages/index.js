@@ -67,9 +67,3 @@ export default function Home() {
     </div>
   );
 }
-
-Home.getInitialProps = () => {
-  return {
-    aa: 1,
-  };
-};
