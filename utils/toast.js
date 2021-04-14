@@ -12,6 +12,7 @@ export default class Toast {
 
     this.wrap = null;
     this.aniTime = 0;
+    this.queue = [];
   }
 
   initWrap() {
@@ -48,17 +49,28 @@ export default class Toast {
 
     item1.appendChild(item2);
 
+    item1.style.top = this.calcNumPx(this.queue.length);
+
+    this.queue.push(item1);
+
     this.wrap.appendChild(item1);
 
     setTimeout(() => {
-      // item1.classList.remove(...aniList);
-      // item1.className = toastClassNameForContrainer;
       this.hide(item1);
     }, this.aniTime);
   }
 
+  clacTopByQueue() {
+    this.queue.forEach((dom, i) => {
+      dom.style.top = this.calcNumPx(i);
+    });
+  }
+
+  calcNumPx(n) {
+    return n * 46 + 10 + 'px';
+  }
+
   hide(dom) {
-    // dom.classList.add(toastClassNameForAniStart, toastClassNameForOut);
     setTimeout(() => {
       this.play(dom, false);
       this.removeDom(dom);
@@ -67,6 +79,8 @@ export default class Toast {
 
   removeDom(dom) {
     setTimeout(() => {
+      this.queue.shift();
+      this.clacTopByQueue();
       this.wrap.removeChild(dom);
     }, this.aniTime);
   }
