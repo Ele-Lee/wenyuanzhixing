@@ -1,17 +1,18 @@
-import { useLayoutEffect, useEffect, useRef } from "react";
-import { randomHexColor, workerChange } from "../utils/color";
-import { workerChangeSum } from "../utils/calc";
-import WebWorker from "../utils/worker";
-import styles from "../styles/grid.module.css";
+import { useLayoutEffect, useEffect, useRef } from 'react';
+import { randomHexColor, workerChange, aniClassNamePre } from '../utils/color';
+import { workerChangeSum } from '../utils/calc';
+import { setTextInTag, playAnimationByDom } from '../utils/common';
+import WebWorker from '../utils/worker';
+import styles from '../styles/grid.module.css';
 
 const makeMatrix = (row, col) => {
-  return Array.from({ length: row }, (k) => new Int16Array(col));
+  return Array.from({ length: row }, k => new Int8Array(col));
 };
 
-const getMatrixIdxByAttr = (e) => {
+const getMatrixIdxByAttr = e => {
   try {
-    const curIdxStr = e.target.attributes["data-idx"].value;
-    return { idxList: curIdxStr.split("-"), attrStr: curIdxStr };
+    const curIdxStr = e.target.attributes['data-idx'].value;
+    return { idxList: curIdxStr.split('-'), attrStr: curIdxStr };
   } catch (error) {
     console.error(error, e.target);
     return null;
@@ -27,6 +28,7 @@ const toggleMatrixValue = (arr, idxList) => {
   return arr[idxList[0]][idxList[1]];
 };
 
+const spanTagsWrapId = 'spanWrap';
 export default function Grid({ query }) {
   const matrixDataRef = useRef(makeMatrix(+query.width, +query.height));
   const recordSpanTagRef = useRef({});
@@ -56,44 +58,51 @@ export default function Grid({ query }) {
     if (!isNone && isLeft) {
       Reflect.set(recordSpanTagRef.current, attrStr, targetSpan);
       const colorResult = randomHexColor();
-      dispatch("prechange", { [attrStr]: colorResult });
+      dispatch('prechange', { [attrStr]: colorResult });
       targetSpan.style.backgroundColor = colorResult;
       setChange();
     } else if (!isLeft) {
       Reflect.deleteProperty(recordSpanTagRef.current, attrStr, targetSpan);
-      dispatch("removeKey", attrStr);
-      targetSpan.style.backgroundColor = "";
+      dispatch('removeKey', attrStr);
+      targetSpan.style.backgroundColor = '';
       setChange();
     }
   };
 
-  const leftClick = (e) => {
-    if (e.target.tagName.toLocaleLowerCase() !== "span") return;
+  const leftClick = e => {
+    if (e.target.tagName.toLocaleLowerCase() !== 'span') return;
     _handle(e, true);
   };
 
-  const rightClick = (e) => {
+  const rightClick = e => {
     _handle(e, false);
     e.preventDefault();
     return false;
   };
 
   useLayoutEffect(() => {
-    const element = document.getElementById("spanWrap");
+    const wrapElement = document.getElementById(spanTagsWrapId);
+    if (wrapElement.hasChildNodes()) {
+      return;
+    }
+
     const fragment = document.createDocumentFragment();
+
+    const needBatch = matrixData.length * matrixData[0].length <= 300;
 
     const _render = (i, key) => {
       if (matrixData.length <= i) return;
       const list = matrixData[i];
       list.forEach((k, j) => {
-        const span = document.createElement("span");
+        const span = document.createElement('span');
+
         const tmp = `${i}-${j}`;
-        span.setAttribute("data-idx", tmp);
+        span.setAttribute('data-idx', tmp);
         fragment.appendChild(span);
       });
-      element.appendChild(fragment);
+      wrapElement.appendChild(fragment);
 
-      if (key % 6) {
+      if (needBatch || key % 6) {
         _render(i + 1, key + 1);
       } else {
         requestAnimationFrame(() => {
@@ -107,7 +116,7 @@ export default function Grid({ query }) {
   return (
     <div className={styles.wrap}>
       <div
-        id="spanWrap"
+        id={spanTagsWrapId}
         onClick={leftClick}
         onContextMenu={rightClick}
         className={styles.layout}
@@ -133,7 +142,7 @@ function useCalcNum(cb) {
 
   useEffect(() => {
     const handle = function (res) {
-      if (res.data.type === "result") {
+      if (res.data.type === 'result') {
         cb && cb(res.data.payload);
       }
     };
@@ -162,14 +171,19 @@ function useCalcNum(cb) {
 function useChangeColor(recordSpanTagObj) {
   const workerRef = useRef(null);
   const preColorMap = useRef({});
+  const cssStrMap = useRef({});
 
   useEffect(() => {
     workerRef.current = new WebWorker(workerChange);
     workerRef.current.onmessage = function (res) {
-      if (res.data.type === "prechange") {
+      if (res.data.type === 'prechange') {
         preColorMap.current = Object.assign(
           preColorMap.current,
-          res.data.payload
+          res.data.payload.data
+        );
+        cssStrMap.current = Object.assign(
+          cssStrMap.current,
+          res.data.payload.cssStrMap
         );
       }
     };
@@ -180,11 +194,11 @@ function useChangeColor(recordSpanTagObj) {
 
   const dispatch = (type, payload) => {
     switch (type) {
-      case "prechange": {
+      case 'prechange': {
         workerRef.current.postMessage({ type, payload });
         break;
       }
-      case "removeKey": {
+      case 'removeKey': {
         Reflect.deleteProperty(workerRef.current, payload);
         break;
       }
@@ -195,27 +209,39 @@ function useChangeColor(recordSpanTagObj) {
   };
 
   useEffect(() => {
-    const eventFn = (e) => {
+    const eventFn = e => {
       if (e.keyCode == 67) {
+        let txt = ``;
+        Object.keys(cssStrMap.current).forEach(key => {
+          txt += cssStrMap.current[key];
+        });
+
+        setTextInTag('style', txt, 'save-animation-css');
+
         for (const item in recordSpanTagObj) {
           recordSpanTagObj[item].style.backgroundColor =
             preColorMap.current[item];
+
+          playAnimationByDom(
+            recordSpanTagObj[item],
+            aniClassNamePre + preColorMap.current[item].replace('#', '')
+          );
         }
 
-        dispatch("prechange", preColorMap.current);
+        dispatch('prechange', preColorMap.current);
       }
     };
 
-    window.addEventListener("keyup", eventFn);
+    window.addEventListener('keyup', eventFn);
     return () => {
-      window.removeEventListener("keyup", eventFn);
+      window.removeEventListener('keyup', eventFn);
     };
   }, [preColorMap, recordSpanTagObj]);
 
-  return { dispatch };
+  return { dispatch, preColorMap };
 }
 
-Grid.getInitialProps = (p) => {
+Grid.getInitialProps = p => {
   return {
     query: p.query,
   };

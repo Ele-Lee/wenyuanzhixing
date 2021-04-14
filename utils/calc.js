@@ -3,7 +3,7 @@ export const workerChangeSum = function () {
     const calcRes = getLandsNumFromGrid(e.data.data);
 
     postMessage({
-      type: "result",
+      type: 'result',
       payload: { sum: calcRes.num, orderId: e.data.orderId },
     });
   };
@@ -12,7 +12,7 @@ export const workerChangeSum = function () {
     const maxRow = grid.length;
     const maxLow = grid[0].length;
 
-    const recordMap = {};
+    // const recordMap = {};
 
     function move(_arr, row, low) {
       if (
@@ -25,7 +25,7 @@ export const workerChangeSum = function () {
         return false;
       }
       grid[row][low] = 0;
-      recordMap[`${row}-${low}`] = 1;
+      // recordMap[`${row}-${low}`] = 1;
 
       if (grid[row][low] == 1) {
         grid[row][low] += 1;
@@ -46,11 +46,11 @@ export const workerChangeSum = function () {
       }
     }
 
-    Object.keys(recordMap).forEach((k) => {
-      const tmp = k.split("-");
-      grid[tmp[0]][tmp[1]] = 1;
-    });
+    // Object.keys(recordMap).forEach((k) => {
+    //   const tmp = k.split("-");
+    //   grid[tmp[0]][tmp[1]] = 1;
+    // });
 
-    return { num: res, recordMap };
+    return { num: res };
   }
 };

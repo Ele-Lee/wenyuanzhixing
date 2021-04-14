@@ -1,0 +1,26 @@
+.inputBox {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+
+  width: 200px;
+  height: 250px;
+
+  text-align: center;
+}
+
+.inputBox > div {
+  margin: 6px 0;
+  display: flex;
+}
+
+.inputBox > div > input {
+  flex: 1;
+}
+
+.inputBox > .last {
+  flex-direction: row-reverse;
+}

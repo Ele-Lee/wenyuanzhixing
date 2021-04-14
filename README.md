@@ -1,3 +1,9 @@
+## 启动
+
+1. npm i
+2. npm run dev
+3. http://localhost:3000/
+
 ## 题目
 
 使用 html + js 写一个马赛克画板（2.1 版）：
