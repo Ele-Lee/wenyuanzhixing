@@ -26,7 +26,7 @@ export const workerChange = function () {
       const tmp = targetColor.replace('#', '');
       return `
       .${aniClassNamePre}${tmp} {
-        animation-duration: 2s;
+        animation-duration: 1.4s;
         animation-name: hueRotate-${tmp};
       }
       
@@ -37,7 +37,7 @@ export const workerChange = function () {
         }
       
         100% {
-          filter: hue-rotate(900deg);
+          filter: hue-rotate(720deg);
           background: ${targetColor};
         }
       }

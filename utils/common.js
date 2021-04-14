@@ -35,3 +35,15 @@ export function playAnimationByDom(spanTag, aniClass) {
     });
   });
 }
+
+export function throttle(fn, wait) {
+  let canRun = true;
+  return (...args) => {
+    if (!canRun) return;
+    canRun = false;
+    setTimeout(() => {
+      fn.apply(this, args);
+      canRun = true;
+    }, wait);
+  };
+}

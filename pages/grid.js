@@ -1,7 +1,7 @@
 import { useLayoutEffect, useEffect, useRef } from 'react';
 import { randomHexColor, workerChange, aniClassNamePre } from '../utils/color';
 import { workerChangeSum } from '../utils/calc';
-import { setTextInTag, playAnimationByDom } from '../utils/common';
+import { setTextInTag, playAnimationByDom, throttle } from '../utils/common';
 import WebWorker from '../utils/worker';
 import styles from '../styles/grid.module.css';
 
@@ -232,9 +232,11 @@ function useChangeColor(recordSpanTagObj) {
       }
     };
 
-    window.addEventListener('keyup', eventFn);
+    const wrapFn = throttle(eventFn, 200);
+
+    window.addEventListener('keyup', wrapFn);
     return () => {
-      window.removeEventListener('keyup', eventFn);
+      window.removeEventListener('keyup', wrapFn);
     };
   }, [preColorMap, recordSpanTagObj]);
 
