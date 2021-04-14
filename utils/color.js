@@ -37,7 +37,7 @@ export const workerChange = function () {
         }
       
         100% {
-          filter: hue-rotate(720deg);
+          filter: hue-rotate(900deg);
           background: ${targetColor};
         }
       }
